@@ -6,7 +6,7 @@
 #include <math.h>
 #include <iostream>
 //Service specific
-#include <cxq41_ps2/SinComponent.h>
+#include <cxq41_ps3/SinComponentAction.h>
 //Global Variable Initiation
 std_msgs::Float64 commander_amplitude; //Global variable for storing amplitude
 std_msgs::Float64 commander_frequency; //Global variable for storing frequency

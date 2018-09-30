@@ -7,7 +7,7 @@
 #include <iostream>
 #include <math.h>
 //Service specificfrequency
-#include <cxq41_ps2/SinComponent.h>
+#include <cxq41_ps3/SinComponentAction.h>
 
 int main(int argc, char **argv) {
    //Node Initiation
@@ -16,11 +16,14 @@ int main(int argc, char **argv) {
     //node handler
     ros::NodeHandle getter_nh;
     
-    //Announce the service
-    ros::ServiceClient client = getter_nh.serviceClient<cxq41_ps2::SinComponent>("SinComponentExchange"); //publish info to service
+    //Goal establisher
+    cxq41_ps3::SinComponentGoal goal;
+
+    //Link action server
+    actionlib::SimpleActionClient<cxq41_ps3::SinComponentAction> action_client("sin_commander", true);
 
     //Message type specification
-    cxq41_ps2::SinComponent srv;
+
 
     while (ros::ok()) {
         //Get input for amplitude
