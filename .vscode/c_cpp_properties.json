@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/frank/ros_ws/devel/include",
+        "/opt/ros/kinetic/include",
+        "/home/frank/ros_ws/src/cxq41_ps3/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}
