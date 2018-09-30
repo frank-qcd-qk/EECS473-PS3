@@ -1,0 +1,8 @@
+<launch> 
+<node name= "minimal_controller" pkg= "cxq41_ps2" type= "ps2_minimal_controller" /> 
+<node name= "minimal_simulator" pkg= "cxq41_ps2" type= "ps2_minimal_simulator" /> 
+<node name= "sin_commander" pkg= "cxq41_ps2" type= "ps2_sin_commander" />
+<node name= "sin_getter" pkg= "cxq41_ps2" type= "ps2_sin_getter" output= "screen" />
+<!--The tag Output = Sets where the software outputs towards, it can be multiple screens/nodes -->
+<node name= "rqt_gui" pkg="rqt_gui" type="rqt_gui"/>
+</launch> 
