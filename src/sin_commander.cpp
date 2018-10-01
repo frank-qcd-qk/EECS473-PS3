@@ -33,7 +33,7 @@ class sin_commander {
     // define the body of constructor outside class definition
     sin_commander();
 
-    ~sin_commander(void) {  }
+    ~sin_commander(void) {}
 
     // action interface
     void executeCB(const actionlib::SimpleActionServer<
@@ -88,7 +88,7 @@ void sin_commander::executeCB(
         current_time = current_time + dt;
         sinWave_outputter.publish(sin_output);
         ROS_INFO("Current sin_ouput is: %f", sin_output.data);
-        ros::spinOnce(); 
+        ros::spinOnce();
         naptime.sleep();
     }
 
