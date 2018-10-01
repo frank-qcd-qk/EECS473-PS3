@@ -1,65 +1,110 @@
-// code written by Frank Qian CXQ41@case.edu for EECS 473 Homework PS1 node: 
-#include <ros/ros.h> 
-#include <std_msgs/Float64.h> 
+// code written by Frank Qian CXQ41@case.edu for EECS 473 Homework PS3 node:
+#include <ros/ros.h>
+#include <std_msgs/Float64.h>
 #include <string>
-//Project specific include:
+// Project specific include:
 #include <math.h>
 #include <iostream>
-//Service specific
+// Action Server specific
+#include <actionlib/server/simple_action_server.h>
 #include <cxq41_ps3/SinComponentAction.h>
-//Global Variable Initiation
-std_msgs::Float64 commander_amplitude; //Global variable for storing amplitude
-std_msgs::Float64 commander_frequency; //Global variable for storing frequency
-std_msgs::Float64 sin_output; //Global Variable for the sinusoidal output
-const double PI  =3.141592653589793238463; //Yep too fucking lazy to figure out proper way to express pi!
+// Global Variable Initiation
+std_msgs::Float64 commander_amplitude;  // Global variable for storing amplitude
+std_msgs::Float64 commander_frequency;  // Global variable for storing frequency
+std_msgs::Float64 commander_cycle;      // Global variable for storing cycles
+std_msgs::Float64 sin_output;  // Global Variable for the sinusoidal output
+const double PI = 3.141592653589793238463;  // Yep too fucking lazy to figure
+                                            // out proper way to express pi!
 
-//Service callback
-bool callback(cxq41_ps2::SinComponentRequest& request, cxq41_ps2::SinComponentResponse& response) {
-    //Get amplitude
-    commander_amplitude.data = request.amplitude;
-    ROS_INFO("Obtained amplitude is: %f", commander_amplitude.data);
-    //Get frequency
-    commander_frequency.data = request.frequency;
-    ROS_INFO("Obtained frequency is: %f", commander_frequency.data);
-    response.obtained = true;
+class sin_commander {
+   private:
+    // we'll need a node handle; get one upon instantiation
+    ros::NodeHandle nh_;
+    // Establishes a simple action server with name "as_"
+    actionlib::SimpleActionServer<cxq41_ps3::SinComponentAction> as_;
+    // Define message type:
+    cxq41_ps3::SinComponentAction goal_;
+    cxq41_ps3::SinComponentAction result_;
+    cxq41_ps3::SinComponentAction feedback_;
+    // Creates a Publisher
+    ros::Publisher sinWave_outputter;
+
+   public:
+    // define the body of constructor outside class definition
+    sin_commander();
+
+    ~sin_commander(void) {}
+
+    // action interface
+    void executeCB(const actionlib::SimpleActionServer<
+                   cxq41_ps3::SinComponentAction>::GoalConstPtr& goal);
 }
 
+sin_commander::sin_commander()
+    : as_(nh_, "sin_commander",
+          boost::bind(&sin_commander::executeCB, this, _1), false) {
+    ROS_INFO("in constructor of sin_commander...");
+    sinWave_outputter = nh_.advertise<std_msgs::Float64>("vel_cmd", 1);
+    as_.start;
+}
 
-int main(int argc, char **argv) {
-    //Node Initiation
-    ros::init(argc, argv, "sin_commander"); //name this node 
+void sin_commander::executeCB(
+    const actionlib::SimpleActionServer<
+        cxq41_ps3::SinComponentAction>::GoalConstPtr& goal) {
+    ROS_INFO("in executeCB");
+    commander_amplitude.data = goal->amplitude;
+    ROS_INFO("Goal Amplitude is: %f", commander_amplitude);
+    commander_frequency.data = goal->frequency;
+    if (commander_frequency.data == 0) {
+        ROS_FATAL(
+            "Frequency of 0 means nothing hence not accepted!");  // just halt
+                                                                  // the
+                                                                  // software
+                                                                  // when
+                                                                  // someone is
+                                                                  // being
+                                                                  // dumb....
+    }
+    ROS_INFO("Goal Frequency is: %f", commander_frequency);
+    commander_cycle.data = goal->cycles;
+    ROS_INFO("Goal Cycles is: %f", commander_cycle);
 
-    //node handler
-    ros::NodeHandle nh_commander; // node handle
-
-    //Announce the service
-    ros::ServiceServer service = nh_commander.advertiseService("SinComponentExchange",callback); //Get info from service
-
-    //Announcer for topic
-    ros::Publisher sinWave_outputter = nh_commander.advertise<std_msgs::Float64>("vel_cmd", 1);
-
-    //Initiate sin_output
+    // Start of Control:
+    // Initiate sin_output
     sin_output.data = 0.00;
+    // Initiate Time for sine generation:
+    double current_time;  // Initate the time
+    current_time = 0.00;  // Resets time to 0
 
-    //Initiate Time for sine generation:
-    double current_time; // Initate the time
-    current_time = 0.00; //Resets time to 0
-
-    //This will both set the sleeper rate as well as the "T" for the sin wave generator
     double dt = 0.01;
-    double sample_rate = 1.0 / dt; 
+    double sample_rate = 1.0 / dt;
     ros::Rate naptime(sample_rate);
 
-
-    while (ros::ok()) {
-        //sin wave is generated below:
-        sin_output.data = commander_amplitude.data * sin(2.00 * commander_frequency.data * PI * current_time);
-        current_time = current_time + dt; //time is ticking!
+    while (ros::ok() && (current_time < (commander_cycle.data / commander_frequency.data))) {
+        sin_output.data =
+            commander_amplitude.data *
+            sin(2.00 * commander_frequency.data * PI * current_time);
+        current_time = current_time + dt;
         sinWave_outputter.publish(sin_output);
-        ROS_INFO("Current sin_ouput is: %f", sin_output.data); //Debug info spit!
-        //----Do not change below as they are critical for operation normally
-        ros::spinOnce(); 
-        naptime.sleep();
+        ROS_INFO("Current sin_ouput is: %f", sin_output.data);
     }
-    return 0; // Not used unless some dummy kills roscore 
-} 
+
+    sin_output.data = 0.0;
+    sinWave_outputter.publish(sin_output);
+
+    result_.completion = true;
+    as_.setSucceeded(result_);
+}
+
+int main(int argc, char** argv) {
+    // Node Initiation
+    ros::init(argc, argv, "sin_commander");  // name this node
+
+    ROS_INFO("Instantiating the sin_commander action server...");
+
+    sin_commander as_object;
+
+    ros::spin();
+
+    return 0;  // Not used unless some dummy kills roscore
+}
