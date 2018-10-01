@@ -73,7 +73,6 @@ void sin_commander::executeCB(
     // Initiate Time for sine generation:
     double current_time;  // Initate the time
     current_time = 0.00;  // Resets time to 0
-
     double dt = 0.01;
     double sample_rate = 1.0 / dt;
     ros::Rate naptime(sample_rate);
