@@ -38,7 +38,7 @@ class sin_commander {
     // action interface
     void executeCB(const actionlib::SimpleActionServer<
                    cxq41_ps3::SinComponentAction>::GoalConstPtr& goal);
-};
+}; //Need to have a semi-column or it will throw return errors....
 
 sin_commander::sin_commander()
     : as_(nh_, "sin_commander",
