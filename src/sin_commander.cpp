@@ -51,19 +51,17 @@ sin_commander::sin_commander()
 void sin_commander::executeCB(
     const actionlib::SimpleActionServer<
         cxq41_ps3::SinComponentAction>::GoalConstPtr& goal) {
-    ROS_INFO("in executeCB");
+    ROS_DEBUG("in executeCB"); //Debug indication
+
     commander_amplitude.data = goal->amplitude;
     ROS_INFO("Goal Amplitude is: %f", commander_amplitude);
     commander_frequency.data = goal->frequency;
     if (commander_frequency.data == 0) {
         ROS_FATAL(
-            "Frequency of 0 means nothing hence not accepted!");  // just halt
-                                                                  // the
-                                                                  // software
-                                                                  // when
-                                                                  // someone is
+            "Frequency of 0 means nothing hence not accepted!");  // Yell at
+                                                                  // someone
                                                                   // being
-                                                                  // dumb....
+                                                                  // stupid...
     }
     ROS_INFO("Goal Frequency is: %f", commander_frequency);
     commander_cycle.data = goal->cycles;
@@ -88,6 +86,8 @@ void sin_commander::executeCB(
         current_time = current_time + dt;
         sinWave_outputter.publish(sin_output);
         ROS_INFO("Current sin_ouput is: %f", sin_output.data);
+        // If you don't have below your sin wave will be squarish....Learned the
+        // hard way....
         ros::spinOnce();
         naptime.sleep();
     }
