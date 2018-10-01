@@ -23,9 +23,9 @@ class sin_commander {
     // Establishes a simple action server with name "as_"
     actionlib::SimpleActionServer<cxq41_ps3::SinComponentAction> as_;
     // Define message type:
-    cxq41_ps3::SinComponentAction goal_;
-    cxq41_ps3::SinComponentAction result_;
-    cxq41_ps3::SinComponentAction feedback_;
+    cxq41_ps3::SinComponentGoal goal_;
+    cxq41_ps3::SinComponentResult result_;
+    cxq41_ps3::SinComponentFeedback feedback_;
     // Creates a Publisher
     ros::Publisher sinWave_outputter;
 
@@ -33,19 +33,19 @@ class sin_commander {
     // define the body of constructor outside class definition
     sin_commander();
 
-    ~sin_commander(void) {}
+    ~sin_commander(void) {  }
 
     // action interface
     void executeCB(const actionlib::SimpleActionServer<
                    cxq41_ps3::SinComponentAction>::GoalConstPtr& goal);
-}
+};
 
 sin_commander::sin_commander()
     : as_(nh_, "sin_commander",
           boost::bind(&sin_commander::executeCB, this, _1), false) {
     ROS_INFO("in constructor of sin_commander...");
     sinWave_outputter = nh_.advertise<std_msgs::Float64>("vel_cmd", 1);
-    as_.start;
+    as_.start();
 }
 
 void sin_commander::executeCB(
@@ -80,13 +80,16 @@ void sin_commander::executeCB(
     double sample_rate = 1.0 / dt;
     ros::Rate naptime(sample_rate);
 
-    while (ros::ok() && (current_time < (commander_cycle.data / commander_frequency.data))) {
+    while (ros::ok() &&
+           (current_time < (commander_cycle.data / commander_frequency.data))) {
         sin_output.data =
             commander_amplitude.data *
             sin(2.00 * commander_frequency.data * PI * current_time);
         current_time = current_time + dt;
         sinWave_outputter.publish(sin_output);
         ROS_INFO("Current sin_ouput is: %f", sin_output.data);
+        ros::spinOnce(); 
+        naptime.sleep();
     }
 
     sin_output.data = 0.0;
@@ -98,7 +101,7 @@ void sin_commander::executeCB(
 
 int main(int argc, char** argv) {
     // Node Initiation
-    ros::init(argc, argv, "sin_commander");  // name this node
+    ros::init(argc, argv, "ps3_sin_commander");  // name this node
 
     ROS_INFO("Instantiating the sin_commander action server...");
 

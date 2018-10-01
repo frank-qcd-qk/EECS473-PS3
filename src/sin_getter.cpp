@@ -17,7 +17,7 @@ void doneCb(const actionlib::SimpleClientGoalState& state,
 
 int main(int argc, char** argv) {
     // Node Initiation
-    ros::init(argc, argv, "sin_getter");
+    ros::init(argc, argv, "ps3_sin_getter");
 
     // Goal establisher
     cxq41_ps3::SinComponentGoal goal;
