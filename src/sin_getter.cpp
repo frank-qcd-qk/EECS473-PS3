@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
         ROS_INFO("Sending Goals Now....");
         action_client.sendGoal(goal, &doneCb);  // Send goal to server
         bool finished_before_timeout = action_client.waitForResult(
-            ros::Duration(5.0));  // Waiting for another 5 seconds
+            ros::Duration());
         // Time Checker
         if (!finished_before_timeout) {
             ROS_FATAL("Giving up waiting....");
